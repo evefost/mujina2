@@ -27,7 +27,7 @@ sp:
   # Resource URL for the idp metadata
   idp_metadata_url: classpath:metadata/mujina.local.idp.metadata.xml
   # SingleSignOnServiceLocation
-  single_sign_on_service_location: http://localhost:8080/SingleSignOnService
+  single_sign_on_service_location: http://localhost.charlesproxy.com:8080/SingleSignOnService
   # ACS location
   acs_location_path: /saml/SSO
   # Protocol binding

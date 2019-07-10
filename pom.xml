@@ -27,7 +27,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <java.version>1.8</java.version>
     <httpclient.version>4.5.6</httpclient.version>
-    <spring-security-saml2-core.version>1.0.4.RELEASE</spring-security-saml2-core.version>
+    <spring-security-saml2-core.version>1.0.3.RELEASE</spring-security-saml2-core.version>
   </properties>
 
   <parent>

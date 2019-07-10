@@ -1,0 +1,25 @@
+@startuml
+Client->SP
+SP->VirtualFilterChain
+VirtualFilterChain -> MetadataGeneratorFilter: doFilter() 可能会初始化 sp,idp saml meta信息
+SecurityContextPersistenceFilter -> SecurityContextPersistenceFilter:doFilter 获取context,如果context为空，则创建新的context
+SecurityContextPersistenceFilter->HttpSessionSecurityContextRepository:loadContext() 通过session读取context
+SecurityContextPersistenceFilter->SecurityContextHolder:setContext()临时把context保存到threadLocal,当doilter退出时清除
+LogoutFilter->ConfigurableSAMLEntryPoint:commence() saml 开始认证入口
+ConfigurableSAMLEntryPoint->ConfigurableSAMLEntryPoint:initializeSSO初始化单点登录
+ConfigurableSAMLEntryPoint->WebSSOProfileImpl:sendAuthenticationRequest 发送认证请求
+WebSSOProfileImpl->WebSSOProfileImpl:getAuthnRequest构建AuthnRequest
+WebSSOProfileImpl->WebSSOProfileImpl:sendMessage AuthnRequest构建完成发，准备发送
+WebSSOProfileImpl->ConfigurableSAMLProcessor:sendMessage(samlContext,sign)发送前添加配置信息
+ConfigurableSAMLProcessor->HTTPPostEncoder:encode 开始encode 成xml格式
+HTTPPostEncoder->HTTPPostEncoder:doEncode
+HTTPPostEncoder->HTTPPostEncoder:getEndpointURL() 获取授权端(idp)url
+HTTPPostEncoder->HTTPPostEncoder:signMessage(samlMsgCtx) 签名授权消息
+HTTPPostEncoder->HTTPPostEncoder:postEncode(samlMsgCtx, endpointURL)\n开始利用Velocity模板引擎\n把授权信息生成html格式消息并发给client
+HTTPPostEncoder->HTTPPostEncoder:populateVelocityContext 设置velocityContext变量，把AuthRequest转成xml字符串，并将xml串base64Encode后作为veloctiy $SAMLRequest的值
+HTTPPostEncoder->HTTPPostEncoder:velocityEngine 利用上一步信息生成html发给client
+VirtualFilterChain->SP:
+SP->Client:
+Client->IDP:
+IDP->Client:
+@enduml
