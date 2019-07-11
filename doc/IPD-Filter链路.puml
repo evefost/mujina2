@@ -1,0 +1,17 @@
+@startuml
+Client->MetadataGeneratorFilter: doFilter() 可能会初始化\n sp,idp saml meta信息
+MetadataGeneratorFilter->SecurityContextPersistenceFilter:下一个filter
+SecurityContextPersistenceFilter -> SecurityContextPersistenceFilter:doFilter 获取context,\n如果context为空，则创建新的context
+SecurityContextPersistenceFilter->LogoutFilter:登出filter
+LogoutFilter->ForceAuthnFilter:强制认证filter
+ForceAuthnFilter->SAMLAttributeAuthenticationFilter
+SAMLAttributeAuthenticationFilter->UsernamePasswordAuthenticationFilter
+UsernamePasswordAuthenticationFilter->ExceptionTranslationFilter:未认证，流转下一下
+FilterSecurityInterceptor->FilterSecurityInterceptor:invoke(fi)检测是否认证
+FilterSecurityInterceptor->ExceptionTranslationFilter:捕获到未认证异常
+ExceptionTranslationFilter->ExceptionTranslationFilter:handleSpringSecurityException \n处理invoke(fi)抛出的异常
+ExceptionTranslationFilter->ExceptionTranslationFilter:sendStartAuthentication 发送授权认证
+ExceptionTranslationFilter->LoginUrlAuthenticationEntryPoint:commence() saml 认证实现入口
+LoginUrlAuthenticationEntryPoint->DefaultRedirectStrategy:sendRedirect 让client重定向到idp登录页面
+Client<-DefaultRedirectStrategy:
+@enduml

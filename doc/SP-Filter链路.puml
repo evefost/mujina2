@@ -1,0 +1,16 @@
+@startuml
+Client->SP
+
+SP-> MetadataGeneratorFilter: doFilter() 可能会初始化\n sp,idp saml meta信息
+MetadataGeneratorFilter->SecurityContextPersistenceFilter:下一个filter
+SecurityContextPersistenceFilter -> SecurityContextPersistenceFilter:doFilter 获取context,\n如果context为空\n则创建新的context
+SecurityContextPersistenceFilter->LogoutFilter:登出filter
+LogoutFilter->ExceptionTranslationFilter:略去n个filter
+ExceptionTranslationFilter->FilterSecurityInterceptor:doFilter
+FilterSecurityInterceptor->FilterSecurityInterceptor:invoke(fi)检测是否认证
+FilterSecurityInterceptor->ExceptionTranslationFilter:捕获到未认证异常
+ExceptionTranslationFilter->ExceptionTranslationFilter:handleSpringSecurityException \n处理invoke(fi)抛出的异常
+ExceptionTranslationFilter->ExceptionTranslationFilter:sendStartAuthentication 发送授权认证
+ExceptionTranslationFilter->ConfigurableSAMLEntryPoint:commence() saml 认证实现入口
+ConfigurableSAMLEntryPoint->Client:
+@enduml

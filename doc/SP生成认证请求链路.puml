@@ -1,0 +1,21 @@
+@startuml
+Client->ExceptionTranslationFilter
+ExceptionTranslationFilter->FilterSecurityInterceptor
+FilterSecurityInterceptor->FilterSecurityInterceptor:invoke(fi)未认证异常
+FilterSecurityInterceptor->ExceptionTranslationFilter:捕获到异常
+ExceptionTranslationFilter->ExceptionTranslationFilter:sendStartAuthentication发送认证信息
+ExceptionTranslationFilter->ConfigurableSAMLEntryPoint:commence() saml 开始认证入口
+ConfigurableSAMLEntryPoint->ConfigurableSAMLEntryPoint:initializeSSO初始化单点登录
+ConfigurableSAMLEntryPoint->WebSSOProfileImpl:sendAuthenticationRequest 发送认证请求
+WebSSOProfileImpl->WebSSOProfileImpl:getAuthnRequest构建AuthnRequest
+WebSSOProfileImpl->WebSSOProfileImpl:sendMessage AuthnRequest构建完成发，准备发送
+WebSSOProfileImpl->ConfigurableSAMLProcessor:sendMessage(samlContext,sign)发送前添加配置信息
+ConfigurableSAMLProcessor->HTTPPostEncoder:encode 开始encode 成xml格式
+HTTPPostEncoder->HTTPPostEncoder:doEncode
+HTTPPostEncoder->HTTPPostEncoder:getEndpointURL() 获取授权端(idp)url
+HTTPPostEncoder->HTTPPostEncoder:signMessage(samlMsgCtx) 签名授权消息
+HTTPPostEncoder->HTTPPostEncoder:postEncode(samlMsgCtx, endpointURL)\n开始利用Velocity模板引擎\n把授权信息生成html格式消息并发给client
+HTTPPostEncoder->HTTPPostEncoder:populateVelocityContext \n设置velocityContext变量，\n把AuthRequest转成xml字符串，\n并将xml串base64Encode后\n作为veloctiy $SAMLRequest的值
+HTTPPostEncoder->HTTPPostEncoder:velocityEngine 利用上一步信息\n生成html发给client
+HTTPPostEncoder->Client:
+@enduml
