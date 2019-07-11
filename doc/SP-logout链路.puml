@@ -1,0 +1,16 @@
+@startuml
+Client->SP:登出
+SP-> MetadataGeneratorFilter: doFilter() 可能会初始化\n sp,idp saml meta信息
+MetadataGeneratorFilter->SecurityContextPersistenceFilter:下一个filter
+SecurityContextPersistenceFilter -> SecurityContextPersistenceFilter:doFilter 获取context,\n如果context为空\n则创建新的context
+SecurityContextPersistenceFilter->LogoutFilter:登出filter
+LogoutFilter->LogoutFilter:requiresLogout(request, response)\n匹配 get /logout如返回true，则为登出动作
+LogoutFilter->CompositeLogoutHandler:logout(request, response, auth)\n遍历执行所有logoutHandler,这里没有自定制的\n只有SecurityContextLogoutHandler
+CompositeLogoutHandler->SecurityContextLogoutHandler:logout(),使用session失效,\n并清除threadLocalContext
+SecurityContextLogoutHandler->LogoutFilter
+LogoutFilter->DelegatingLogoutSuccessHandler:onLogoutSuccess()\n遍历定制匹配的LogoutSuccessHandler,如果没有\n则使用默认的(SimpleUrlLogoutSuccessHandler)
+DelegatingLogoutSuccessHandler->SimpleUrlLogoutSuccessHandler:onLogoutSuccess()寻找登出后重定向的地址
+SimpleUrlLogoutSuccessHandler->DefaultRedirectStrategy:sendRedirect(request, response,target)通知client重定到target地址
+DefaultRedirectStrategy->Client:
+
+@enduml
