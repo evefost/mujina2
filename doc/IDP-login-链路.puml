@@ -1,13 +1,14 @@
 @startuml
-Client->SP:重新登录\n(只退出SP后，IDP没有没退出)
-SP->SecurityContextPersistenceFilter:下一个filter
-SecurityContextPersistenceFilter -> SecurityContextPersistenceFilter:doFilter 获取context,\n如果context为空\n则创建新的context
+Client->IDP:登录\n(带上idpSessionId,帐号/密码)
+IDP->SecurityContextPersistenceFilter:doFilter 获取context,\n如果context为空\n则创建新的context
 SecurityContextPersistenceFilter->AnonymousAuthenticationFilter:匿名认证filter
 AnonymousAuthenticationFilter->AnonymousAuthenticationFilter:createAuthentication(request)\n如果认证信息为空，则创建匿名的认证信息体
 AnonymousAuthenticationFilter->SessionManagementFilter:会话管理filter
 SessionManagementFilter->SessionManagementFilter:检测sessionId是否有效\n(无效:因为session之前登出过)
 SessionManagementFilter->ExceptionTranslationFilter:异常filter
-ExceptionTranslationFilter->FilterSecurityInterceptor:安全filter
+SessionManagementFilter->UsernamePasswordAuthenticationFilter:帐号密码认证信息处理
+UsernamePasswordAuthenticationFilter->ProviderManager:authenticate 遍历所有provider
+ProviderManager->AuthenticationProvider:认证实现(可自定义)
 FilterSecurityInterceptor->FilterSecurityInterceptor:invoke(fi)
 FilterSecurityInterceptor->FilterSecurityInterceptor:beforeInvocation(fi)
 FilterSecurityInterceptor->AffirmativeBased:decide()判断是否可以访问

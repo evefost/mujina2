@@ -30,6 +30,7 @@ public class AuthenticationProvider implements org.springframework.security.auth
         authentication.getCredentials(),
         Arrays.asList(new SimpleGrantedAuthority("ROLE_ADMIN"), new SimpleGrantedAuthority("ROLE_USER")));
     } else {
+      //这里可以做用户校验(重写)
       return idpConfiguration.getUsers().stream()
         .filter(token ->
           token.getPrincipal().equals(authentication.getPrincipal()) &&

@@ -88,6 +88,7 @@ public class WebSecurityConfigurer extends WebMvcConfigurerAdapter {
     return new UpgradedSAMLBootstrap();
   }
 
+
   @Autowired
   @Bean
   public JKSKeyManager keyManager(@Value("${idp.entity_id}") String idpEntityId,
@@ -148,6 +149,7 @@ public class WebSecurityConfigurer extends WebMvcConfigurerAdapter {
       auth.authenticationProvider(new AuthenticationProvider(idpConfiguration));
     }
 
+    @Override
     @Bean
     public AuthenticationManager authenticationManagerBean() throws Exception {
       return super.authenticationManagerBean();
